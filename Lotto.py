@@ -23,31 +23,46 @@ for row in rows:
     #split comment to parse # of ticket and check that it is a ticket
     words = row[5][27:].replace('-', "").split(' ')
     print(row[5][27:])
-    #check if comment contains keywork ticket
-    if "ticket" in row[5][27:].lower():
-        isticket = True
-    else:
-        isticket = False
-    if "membership" in row[5][27:].lower():
-        ismembership = True
-    else:
-        ismembership = False
 
-    #check if row is a charge and that 1st word is integer to represent # of tickets
-    #if it is add it to the result list    
-    if row[2] == "incoming" and row[3] == "purchase" and words[0].replace("x", "").isnumeric() == True and isticket == True:
-        for i in range(int(words[0].replace("x", ""))):
+    #iterate through comment to find integers
+    numbers = []
+    number = ""
+    tickets = "0"
+    for element in row[5][27:]:        
+        if element.isnumeric():
+            if len(number) > 0:
+                number = number + element
+            else:
+               number = element
+        else:
+            if len(number) > 0:
+                if int(number) <= 10:
+                    numbers.append(number)
+                number = ""
+    #check that comment includes keyword ticket and only has 1 valid integer
+    if ("ticket" in row[5][27:].lower()) == True and len(numbers) == 1:
+        isticket = True
+        tickets = numbers[0]
+    else:
+        isticket = False    
+        
+    
+    #check if row is a charge
+    #if it is add it to the result list and had a valid # of tickets
+    if row[2] == "incoming" and row[3] == "purchase" and isticket == True:
+        row.append(tickets)
+        for i in range(int(tickets)):
             results.append(row)
 
     #create seperate list of transactions that dont have a comment that starts with 
     #an integer then keyword ticket, but the transaction type could be ticket sale with a bad comment ie. for the # 
-    elif row[2] == "incoming" and row[3] == "purchase" and ismembership == False:
+    elif row[2] == "incoming" and row[3] == "purchase" and ("membership" in row[5][27:].lower()) == False:
         nopattern.append(row)
 
 #write results to text file for the randomizer
 f = open("result.txt", "w")
 for el in results:
-    f.write(el[4]+'\t'+el[5][27:].replace('\n', " ")+'\n')
+    f.write(str(int((int(el[4])/int(el[8]))))+'\t'+el[5][27:].replace('\n', " ")+'\n')
 #write the non matching records to new csv file for review
 f = open("mismatches.csv", "w")
 for el in nopattern:
