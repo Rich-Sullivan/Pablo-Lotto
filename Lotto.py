@@ -58,6 +58,9 @@ for row in rows:
     #an integer then keyword ticket, but the transaction type could be ticket sale with a bad comment ie. for the # 
     elif row[2] == "incoming" and row[3] == "purchase" and ("membership" in row[5][27:].lower()) == False:
         nopattern.append(row)
+    elif row[2] == "outgoing" and row[3] == "transfer" and ("win" in row[5].lower()) == True:
+        results.clear()
+        nopattern.clear()
 
 #write results to text file for the randomizer
 f = open("result.txt", "w")
