@@ -12,9 +12,6 @@ rows = []
 results = []
 nopattern = []
 
-#temporary price of tickets
-price = 500
-
 #read csv file
 with open (filename, 'r') as csvfile:
     csvreader = csv.reader(csvfile)
@@ -23,34 +20,35 @@ with open (filename, 'r') as csvfile:
         rows.append(row)
 
 for row in rows:
-    #calculate # of ticket based of price if invalid ie. charged $700 price @ $500 700 / 500 has remainder
-    if int(row[4]) % price == 0:
-        tickets = int(int(row[4])/price)
-        goodprice = True
+    #split comment to parse # of ticket and check that it is a ticket
+    words = row[5][27:].replace('-', "").split(' ')
+    print(row[5][27:])
+    #check if comment contains keywork ticket
+    if "ticket" in row[5][27:].lower():
+        isticket = True
     else:
-        tickets = 1
-        goodprice = False
-    #check if row is a charge
-    #when you want to start doing membership we can do this easily if the comment for charges to buisiness account are something like
-    #{# of items charged for}, {item}, {client name}, {state id}
-    #ie 3, tickets, Scruffy doodle, 6876 or 1, membership, Scruffy doodle, 6876
-    # this would allow for easy identification of sales type
-    if row[2] == "incoming" and row[3] == "purchase" and goodprice == True:
-        for i in range(tickets):
+        isticket = False
+    if "membership" in row[5][27:].lower():
+        ismembership = True
+    else:
+        ismembership = False
+
+    #check if row is a charge and that 1st word is integer to represent # of tickets
+    #if it is add it to the result list    
+    if row[2] == "incoming" and row[3] == "purchase" and words[0].replace("x", "").isnumeric() == True and isticket == True:
+        for i in range(int(words[0].replace("x", ""))):
             results.append(row)
 
-    #create seperate list of transactions that dont mathamatically make sense $ charge wise, 
-    #when memberships start this would include transactions that the comments that 
-    #dont include a # < 10 for # of tickets and an item type ie. ticket, or membership
-    elif row[2] == "incoming" and row[3] == "purchase":
-        for i in range(tickets):
-            nopattern.append(row)
+    #create seperate list of transactions that dont have a comment that starts with 
+    #an integer then keyword ticket, but the transaction type could be ticket sale with a bad comment ie. for the # 
+    elif row[2] == "incoming" and row[3] == "purchase" and ismembership == False:
+        nopattern.append(row)
 
 #write results to text file for the randomizer
-f = open("result.txt", "a")
+f = open("result.txt", "w")
 for el in results:
     f.write(el[4]+'\t'+el[5][27:].replace('\n', " ")+'\n')
 #write the non matching records to new csv file for review
-f = open("mismatches.csv", "a")
+f = open("mismatches.csv", "w")
 for el in nopattern:
     f.write(el[4]+','+el[5][27:].replace('\n', " ")+'\n')
