@@ -36,7 +36,7 @@ for row in rows:
                number = element
         else:
             if len(number) > 0:
-                if int(number) <= 10:
+                if int(number) <= 10 and int(number) > 0:
                     numbers.append(number)
                 number = ""
     #check that comment includes keyword ticket and only has 1 valid integer
