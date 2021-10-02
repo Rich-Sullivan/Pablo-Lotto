@@ -59,8 +59,7 @@ for row in rows:
     elif row[2] == "incoming" and row[3] == "purchase" and ("membership" in row[5][27:].lower()) == False:
         nopattern.append(row)
     elif row[2] == "outgoing" and row[3] == "transfer" and ("win" in row[5].lower()) == True:
-        results.clear()
-        nopattern.clear()
+        break
 
 #write results to text file for the randomizer
 f = open("result.txt", "w")
