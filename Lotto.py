@@ -51,6 +51,7 @@ for row in rows:
     #if it is add it to the result list and had a valid # of tickets
     if row[2] == "incoming" and row[3] == "purchase" and isticket == True:
         row.append(tickets)
+        #next line needed i
         for i in range(int(tickets)):
             results.append(row)
 
